@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_string_interpolations, sort_child_properties_last
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:todolist/hexcolor.dart';
+
+import 'single_task_page.dart';
 
 final firestore = FirebaseFirestore.instance;
 
@@ -16,6 +20,8 @@ class SingleTask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool important = taskdoc["important"];
+
     return CardTemplate(
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -46,7 +52,28 @@ class SingleTask extends StatelessWidget {
                 SizedBox(
                   width: 20,
                 ),
-                Text(taskdoc["title"])
+                Text(taskdoc["title"]),
+                Expanded(child: Container()),
+                GestureDetector(
+                  onTap: () {
+                    firestore
+                        .collection("Users")
+                        .doc(FirebaseAuth.instance.currentUser!.email)
+                        .collection("Dates")
+                        .doc(currentDate)
+                        .collection("Tasks")
+                        .doc(taskdoc.id)
+                        .update({"important": !important});
+                    ScaffoldMessenger.of(scafcon).showSnackBar(const SnackBar(
+                      content: Text("Task Updated!"),
+                      duration: Duration(milliseconds: 300),
+                    ));
+                  },
+                  child: Icon(
+                    !important ? Icons.star_outline : Icons.star,
+                    color: Colors.yellow,
+                  ),
+                )
               ],
             ),
             children: [
@@ -64,7 +91,14 @@ class SingleTask extends StatelessWidget {
                     children: [
                       Text(taskdoc["description"]),
                       Text(
-                          "${DateFormat(DateFormat.HOUR24_MINUTE).format(taskdoc["time-added"].toDate())}"),
+                          "${DateFormat(DateFormat.YEAR_MONTH_DAY).format(taskdoc["time-added"].toDate())} - ${DateFormat(DateFormat.HOUR_MINUTE).format(taskdoc["time-added"].toDate())}"),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => SingleTaskPage(taskdoc),
+                            ));
+                          },
+                          child: Text("More Details"))
                     ],
                   ),
                 ),
@@ -86,7 +120,9 @@ class FinishedSingleTask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool important = taskdoc["important"];
     return Card(
+      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(7),
         child: Theme(
@@ -107,7 +143,7 @@ class FinishedSingleTask extends StatelessWidget {
                       children: [
                         Text(taskdoc["description"]),
                         Text(
-                            "${DateFormat(DateFormat.HOUR24_MINUTE).format(taskdoc["time-added"].toDate())}"),
+                            "${DateFormat(DateFormat.YEAR_MONTH_DAY).format(taskdoc["time-added"].toDate())} - ${DateFormat(DateFormat.HOUR_MINUTE).format(taskdoc["time-added"].toDate())}"),
                       ],
                     ),
                   ),
@@ -143,6 +179,28 @@ class FinishedSingleTask extends StatelessWidget {
                       taskdoc["title"],
                       style: TextStyle(
                         decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    Expanded(child: Container()),
+                    GestureDetector(
+                      onTap: () {
+                        firestore
+                            .collection("Users")
+                            .doc(FirebaseAuth.instance.currentUser!.email)
+                            .collection("Dates")
+                            .doc(currentDate)
+                            .collection("Tasks")
+                            .doc(taskdoc.id)
+                            .update({"important": !important});
+                        ScaffoldMessenger.of(scafcon)
+                            .showSnackBar(const SnackBar(
+                          content: Text("Task Updated!"),
+                          duration: Duration(milliseconds: 300),
+                        ));
+                      },
+                      child: Icon(
+                        !important ? Icons.star_outline : Icons.star,
+                        color: Colors.yellow,
                       ),
                     )
                   ],

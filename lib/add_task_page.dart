@@ -102,7 +102,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               "title": title.text,
                               "description": description.text,
                               "time-added": DateTime.now(),
-                              "finished": false
+                              "finished": false,
+                              "important": false
                             });
                           }).then((value) {
                             Navigator.pop(context);

@@ -1,25 +1,29 @@
-import 'dart:html';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todolist/about_page.dart';
 import 'package:todolist/add_task_page.dart';
 import 'package:todolist/fitvid.dart';
 import 'package:todolist/hexcolor.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:todolist/search_page.dart';
 import 'package:todolist/splash_screen.dart';
 import 'package:todolist/templates.dart';
 import 'firebase_options.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 // ...
 
 final firestore = FirebaseFirestore.instance;
 Future main() async {
+  // debugPaintSizeEnabled = true;
+  setUrlStrategy(PathUrlStrategy());
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // debugPaintSizeEnabled = true;
@@ -38,9 +42,11 @@ ThemeData theme() {
           extendedTextStyle: GoogleFonts.redHatDisplay(
               color: Colors.white, fontWeight: FontWeight.w500)),
       appBarTheme: AppBarTheme(
+          iconTheme: IconThemeData(color: Colors.white),
           surfaceTintColor: Colors.transparent,
           backgroundColor: CHEKK_GREEN,
-          titleTextStyle: GoogleFonts.redHatDisplay(color: Colors.white)),
+          titleTextStyle: GoogleFonts.redHatDisplay(
+              color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500)),
       // textTheme: GoogleFonts.redHatDisplayTextTheme(),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
@@ -89,10 +95,10 @@ class _MainScreenState extends State<MainScreen> {
   final emailauthprov = EmailAuthProvider();
   final searchcontroller = TextEditingController();
   bool searching = false;
+  String currentPage = 'Homepage';
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     isLoggedIn();
   }
@@ -102,16 +108,18 @@ class _MainScreenState extends State<MainScreen> {
     List<DocumentSnapshot> dates = [];
     return loggedin
         ? Scaffold(
-            floatingActionButton: FloatingActionButton.extended(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => AddTaskPage(context),
-                  ));
-                },
-                label: Text(
-                  "Add a Task",
-                  style: TextStyle(color: Colors.white),
-                )),
+            floatingActionButton: currentPage == 'Homepage'
+                ? FloatingActionButton.extended(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => AddTaskPage(context),
+                      ));
+                    },
+                    label: Text(
+                      "Add a Task",
+                      style: TextStyle(color: Colors.white),
+                    ))
+                : null,
             appBar: AppBar(
               title: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -121,43 +129,60 @@ class _MainScreenState extends State<MainScreen> {
                       height: 40,
                       child: Image.asset("assets/chekk_white_variant.png")),
                   Expanded(child: Container()),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6.0),
-                    child: SizedBox(
-                        width: MediaQuery.of(context).size.width / 2,
-                        child: TextFormField(
-                          onChanged: (value) {
-                            if (searchcontroller.text == null ||
-                                searchcontroller.text.length == 0) {
-                              setState(() {
-                                searching = false;
-                              });
-                            }
-                          },
-                          onEditingComplete: () {
-                            setState(() {
-                              if (searchcontroller.text == null ||
-                                  searchcontroller.text.length == 0) {
-                                searching = false;
-                              } else {
-                                searching = true;
-                              }
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text("Entered"),
-                              duration: Duration(milliseconds: 500),
-                            ));
-                          },
-                          controller: searchcontroller,
-                          decoration: InputDecoration(
-                              alignLabelWithHint: false,
-                              icon: Icon(Icons.search_rounded),
-                              iconColor: Colors.white,
-                              label: Text("Search for a Task"),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 15)),
-                        )),
-                  )
+                  TextButton(
+                      onPressed: () =>
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => SearchPage(email),
+                          )),
+                      child: Icon(
+                        Icons.search_rounded,
+                        color: Colors.white,
+                      ))
+                ],
+              ),
+            ),
+            drawer: Drawer(
+              child: ListView(
+                children: [
+                  UserAccountsDrawerHeader(
+                      accountName: Container(),
+                      decoration: BoxDecoration(color: CHEKK_GREEN),
+                      accountEmail: Text(
+                          "Hello ${FirebaseAuth.instance.currentUser!.email!}")),
+                  ListTile(
+                    tileColor: currentPage == "Homepage"
+                        ? Colors.grey.withOpacity(0.2)
+                        : null,
+                    trailing: Icon(Icons.home_rounded),
+                    // iconColor: AERO,
+                    title: Text(
+                      "Homepage",
+                    ),
+                    onTap: (() {
+                      setState(() {
+                        currentPage = 'Homepage';
+                      });
+                      print(currentPage);
+                      Navigator.pop(context);
+                    }),
+                  ),
+                  ListTile(
+                    tileColor: currentPage == "About The Developers"
+                        ? Colors.grey.withOpacity(0.2)
+                        : null,
+                    trailing: Icon(Icons.home_rounded),
+                    // iconColor: AERO,
+                    title: Text(
+                      "About The Developers",
+                    ),
+                    onTap: (() {
+                      setState(() {
+                        currentPage = 'About The Developers';
+                      });
+                      print(currentPage);
+                      Navigator.pop(context);
+                    }),
+                  ),
                 ],
               ),
             ),
@@ -167,283 +192,299 @@ class _MainScreenState extends State<MainScreen> {
                   color: CHEKK_GREEN,
                 ),
                 CardTemplate(
-                  child: SingleChildScrollView(
-                    child: Container(
-                      color: CupertinoColors.lightBackgroundGray,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          SizedBox(
-                            height: 40,
-                          ),
-                          SectionTitlesTemplate("All Tasks"),
-                          StreamBuilder(
-                            stream: firestore
-                                .collection("Users")
-                                .doc(email)
-                                .collection("Dates")
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: Container(),
-                                );
-                              } else if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: CHEKK_GREEN,
+                  child: Container(
+                    height: double.maxFinite,
+                    color: CupertinoColors.lightBackgroundGray,
+                    child: currentPage == 'Homepage'
+                        ? SingleChildScrollView(
+                            child: Container(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    height: 40,
                                   ),
-                                );
-                              } else {
-                                List<String> dates = [];
-                                for (DocumentSnapshot date
-                                    in snapshot.data!.docs.toList()) {
-                                  dates.add(date.id);
-                                }
-                                return SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20.0),
-                                    child: ListView.separated(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemBuilder: (context, index) {
-                                          final currentdate = dates[index];
-                                          return Column(
-                                            children: [
-                                              StreamBuilder(
-                                                stream: firestore
-                                                    .collection("Users")
-                                                    .doc(email)
-                                                    .collection("Dates")
-                                                    .doc(currentdate)
-                                                    .collection("Tasks")
-                                                    .where("finished",
-                                                        isEqualTo: false)
-                                                    .snapshots(),
-                                                builder: (context, snapshot) {
-                                                  if (!snapshot.hasData) {
-                                                    return Center(
-                                                      child: Container(),
-                                                    );
-                                                  } else if (snapshot
-                                                          .connectionState ==
-                                                      ConnectionState.waiting) {
-                                                    return Center(
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        color: CHEKK_GREEN,
-                                                      ),
-                                                    );
-                                                  } else {
-                                                    List<DocumentSnapshot>
-                                                        tasks = [];
-                                                    for (DocumentSnapshot task
-                                                        in snapshot
-                                                            .data!.docs.reversed
-                                                            .toList()) {
-                                                      if (searching) {
-                                                        if (task["title"]
-                                                            .toString()
-                                                            .toLowerCase()
-                                                            .startsWith(
-                                                                searchcontroller
-                                                                    .text))
-                                                          tasks.add(task);
-                                                      } else {
-                                                        tasks.add(task);
-                                                      }
-                                                    }
-                                                    if (tasks.isEmpty)
-                                                      return Container();
-                                                    return Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 5.0),
-                                                          child: Text(
-                                                            "Due on " +
-                                                                currentdate,
-                                                            style: GoogleFonts
-                                                                .redHatDisplay(
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        ListView.separated(
-                                                            shrinkWrap: true,
-                                                            physics:
-                                                                NeverScrollableScrollPhysics(),
-                                                            itemBuilder:
-                                                                (context,
-                                                                    index) {
-                                                              final currenttask =
-                                                                  tasks[index];
-
-                                                              return SingleTask(
-                                                                  context,
-                                                                  currentdate,
-                                                                  currenttask);
-                                                            },
-                                                            separatorBuilder:
-                                                                (context,
-                                                                        index) =>
-                                                                    SizedBox(
-                                                                      height: 5,
-                                                                    ),
-                                                            itemCount:
-                                                                tasks.length),
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                      ],
-                                                    );
-                                                  }
-                                                },
-                                              )
-                                            ],
-                                          );
-                                        },
-                                        separatorBuilder: (context, index) =>
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                        itemCount: dates.length),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                          SectionTitlesTemplate("Finished Tasks"),
-                          StreamBuilder(
-                            stream: firestore
-                                .collection("Users")
-                                .doc(email)
-                                .collection("Dates")
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: Text("noData"),
-                                );
-                              } else if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: CHEKK_GREEN,
-                                  ),
-                                );
-                              } else {
-                                List<String> dates = [];
-                                for (DocumentSnapshot date
-                                    in snapshot.data!.docs.reversed.toList()) {
-                                  dates.add(date.id);
-                                }
-                                return SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20.0),
-                                    child: ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemBuilder: (context, index) {
-                                          final currentdate = dates[index];
-                                          return Column(
-                                            children: [
-                                              StreamBuilder(
-                                                stream: firestore
-                                                    .collection("Users")
-                                                    .doc(email)
-                                                    .collection("Dates")
-                                                    .doc(currentdate)
-                                                    .collection("Tasks")
-                                                    .where("finished",
-                                                        isEqualTo: true)
-                                                    .snapshots(),
-                                                builder: (context, snapshot) {
-                                                  if (!snapshot.hasData) {
-                                                    return Center(
-                                                      child: Text("noData"),
-                                                    );
-                                                  } else if (snapshot
-                                                          .connectionState ==
-                                                      ConnectionState.waiting) {
-                                                    return Center(
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        color: CHEKK_GREEN,
-                                                      ),
-                                                    );
-                                                  } else {
-                                                    List<DocumentSnapshot>
-                                                        tasks = [];
-                                                    for (DocumentSnapshot task
-                                                        in snapshot
-                                                            .data!.docs.reversed
-                                                            .toList()) {
-                                                      if (searching) {
-                                                        if (task["title"]
-                                                            .toString()
-                                                            .toLowerCase()
-                                                            .startsWith(
-                                                                searchcontroller
-                                                                    .text))
-                                                          tasks.add(task);
-                                                      } else {
-                                                        tasks.add(task);
-                                                      }
-                                                    }
-                                                    if (tasks.isEmpty)
-                                                      return Container();
-                                                    return ListView.separated(
-                                                        shrinkWrap: true,
-                                                        physics:
-                                                            NeverScrollableScrollPhysics(),
-                                                        itemBuilder:
-                                                            (context, index) {
-                                                          final currenttask =
-                                                              tasks[index];
-
-                                                          return FinishedSingleTask(
-                                                              context,
-                                                              currentdate,
-                                                              currenttask);
-                                                        },
-                                                        separatorBuilder:
-                                                            (context, index) =>
+                                  SectionTitlesTemplate("Current Tasks"),
+                                  StreamBuilder(
+                                    stream: firestore
+                                        .collection("Users")
+                                        .doc(email)
+                                        .collection("Dates")
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return Center(
+                                          child: Container(),
+                                        );
+                                      } else if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            color: CHEKK_GREEN,
+                                          ),
+                                        );
+                                      } else {
+                                        List<String> dates = [];
+                                        for (DocumentSnapshot date
+                                            in snapshot.data!.docs.toList()) {
+                                          dates.add(date.id);
+                                        }
+                                        return SingleChildScrollView(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(20.0),
+                                            child: ListView.separated(
+                                                shrinkWrap: true,
+                                                physics:
+                                                    NeverScrollableScrollPhysics(),
+                                                itemBuilder: (context, index) {
+                                                  final currentdate =
+                                                      dates[index];
+                                                  return Column(
+                                                    children: [
+                                                      StreamBuilder(
+                                                        stream: firestore
+                                                            .collection("Users")
+                                                            .doc(email)
+                                                            .collection("Dates")
+                                                            .doc(currentdate)
+                                                            .collection("Tasks")
+                                                            .where("finished",
+                                                                isEqualTo:
+                                                                    false)
+                                                            .snapshots(),
+                                                        builder: (context,
+                                                            snapshot) {
+                                                          if (!snapshot
+                                                              .hasData) {
+                                                            return Container();
+                                                          } else if (snapshot
+                                                                  .connectionState ==
+                                                              ConnectionState
+                                                                  .waiting) {
+                                                            return Container();
+                                                          } else {
+                                                            List<DocumentSnapshot>
+                                                                tasks = [];
+                                                            for (DocumentSnapshot task
+                                                                in snapshot
+                                                                    .data!
+                                                                    .docs
+                                                                    .reversed
+                                                                    .toList()) {
+                                                              if (searching) {
+                                                                if (task[
+                                                                        "title"]
+                                                                    .toString()
+                                                                    .toLowerCase()
+                                                                    .startsWith(
+                                                                        searchcontroller
+                                                                            .text))
+                                                                  tasks.add(
+                                                                      task);
+                                                              } else {
+                                                                tasks.add(task);
+                                                              }
+                                                            }
+                                                            if (tasks.isEmpty)
+                                                              return Container();
+                                                            return Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
                                                                 SizedBox(
                                                                   height: 10,
                                                                 ),
-                                                        itemCount:
-                                                            tasks.length);
-                                                  }
+                                                                Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          left:
+                                                                              5.0),
+                                                                  child: Text(
+                                                                    "Due on " +
+                                                                        currentdate,
+                                                                    style: GoogleFonts
+                                                                        .redHatDisplay(
+                                                                      fontSize:
+                                                                          20,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                ),
+                                                                ListView
+                                                                    .separated(
+                                                                        shrinkWrap:
+                                                                            true,
+                                                                        physics:
+                                                                            NeverScrollableScrollPhysics(),
+                                                                        itemBuilder:
+                                                                            (context,
+                                                                                index) {
+                                                                          final currenttask =
+                                                                              tasks[index];
+
+                                                                          return SingleTask(
+                                                                              context,
+                                                                              currentdate,
+                                                                              currenttask);
+                                                                        },
+                                                                        separatorBuilder: (context,
+                                                                                index) =>
+                                                                            SizedBox(
+                                                                              height: 5,
+                                                                            ),
+                                                                        itemCount:
+                                                                            tasks.length),
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                ),
+                                                              ],
+                                                            );
+                                                          }
+                                                        },
+                                                      )
+                                                    ],
+                                                  );
                                                 },
-                                              )
-                                            ],
-                                          );
-                                        },
-                                        itemCount: dates.length),
+                                                separatorBuilder:
+                                                    (context, index) =>
+                                                        SizedBox(
+                                                          height: 10,
+                                                        ),
+                                                itemCount: dates.length),
+                                          ),
+                                        );
+                                      }
+                                    },
                                   ),
-                                );
-                              }
-                            },
+                                  SectionTitlesTemplate("Finished Tasks"),
+                                  StreamBuilder(
+                                    stream: firestore
+                                        .collection("Users")
+                                        .doc(email)
+                                        .collection("Dates")
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return Container();
+                                      } else if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Container();
+                                      } else {
+                                        List<String> dates = [];
+                                        for (DocumentSnapshot date in snapshot
+                                            .data!.docs.reversed
+                                            .toList()) {
+                                          dates.add(date.id);
+                                        }
+                                        return SingleChildScrollView(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(20.0),
+                                            child: ListView.builder(
+                                                shrinkWrap: true,
+                                                physics:
+                                                    NeverScrollableScrollPhysics(),
+                                                itemBuilder: (context, index) {
+                                                  final currentdate =
+                                                      dates[index];
+                                                  return Column(
+                                                    children: [
+                                                      StreamBuilder(
+                                                        stream: firestore
+                                                            .collection("Users")
+                                                            .doc(email)
+                                                            .collection("Dates")
+                                                            .doc(currentdate)
+                                                            .collection("Tasks")
+                                                            .where("finished",
+                                                                isEqualTo: true)
+                                                            .snapshots(),
+                                                        builder: (context,
+                                                            snapshot) {
+                                                          if (!snapshot
+                                                              .hasData) {
+                                                            return Container();
+                                                          } else if (snapshot
+                                                                  .connectionState ==
+                                                              ConnectionState
+                                                                  .waiting) {
+                                                            return Container();
+                                                          } else {
+                                                            List<DocumentSnapshot>
+                                                                tasks = [];
+                                                            for (DocumentSnapshot task
+                                                                in snapshot
+                                                                    .data!
+                                                                    .docs
+                                                                    .reversed
+                                                                    .toList()) {
+                                                              if (searching) {
+                                                                if (task[
+                                                                        "title"]
+                                                                    .toString()
+                                                                    .toLowerCase()
+                                                                    .startsWith(
+                                                                        searchcontroller
+                                                                            .text))
+                                                                  tasks.add(
+                                                                      task);
+                                                              } else {
+                                                                tasks.add(task);
+                                                              }
+                                                            }
+                                                            if (tasks.isEmpty)
+                                                              return Container();
+                                                            return ListView
+                                                                .separated(
+                                                                    shrinkWrap:
+                                                                        true,
+                                                                    physics:
+                                                                        NeverScrollableScrollPhysics(),
+                                                                    itemBuilder:
+                                                                        (context,
+                                                                            index) {
+                                                                      final currenttask =
+                                                                          tasks[
+                                                                              index];
+
+                                                                      return FinishedSingleTask(
+                                                                          context,
+                                                                          currentdate,
+                                                                          currenttask);
+                                                                    },
+                                                                    separatorBuilder:
+                                                                        (context,
+                                                                                index) =>
+                                                                            SizedBox(
+                                                                              height: 10,
+                                                                            ),
+                                                                    itemCount: tasks
+                                                                        .length);
+                                                          }
+                                                        },
+                                                      )
+                                                    ],
+                                                  );
+                                                },
+                                                itemCount: dates.length),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  )
+                                ],
+                              ),
+                            ),
                           )
-                        ],
-                      ),
-                    ),
+                        : currentPage == "About The Developers"
+                            ? AboutPage()
+                            : Container(),
                   ),
                 ),
               ],

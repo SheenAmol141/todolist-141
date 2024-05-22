@@ -14,7 +14,7 @@ class _FittedVideoState extends State<FittedVideo> {
   @override
   void initState() {
     super.initState();
-    controller = VideoPlayerController.asset("vid1.mp4")
+    controller = VideoPlayerController.asset("assets/vid_1.mp4")
       ..initialize().then((value) {
         controller.setLooping(true);
         controller.setVolume(0);
