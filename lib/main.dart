@@ -68,8 +68,8 @@ ThemeData theme() {
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
               backgroundColor: MaterialStatePropertyAll(CHEKK_GREEN),
-              textStyle: MaterialStatePropertyAll(TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w700)))),
+              textStyle: MaterialStatePropertyAll(
+                  TextStyle(color: WHITE, fontWeight: FontWeight.w700)))),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
