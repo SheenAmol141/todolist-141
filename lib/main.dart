@@ -9,7 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todolist/about_page.dart';
 import 'package:todolist/add_task_page.dart';
+import 'package:todolist/contact_page.dart';
 import 'package:todolist/fitvid.dart';
+import 'package:todolist/gallery_page.dart';
 import 'package:todolist/hexcolor.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:todolist/search_page.dart';
@@ -170,7 +172,7 @@ class _MainScreenState extends State<MainScreen> {
                     tileColor: currentPage == "About The Developers"
                         ? Colors.grey.withOpacity(0.2)
                         : null,
-                    trailing: Icon(Icons.home_rounded),
+                    trailing: Icon(Icons.person_pin_rounded),
                     // iconColor: AERO,
                     title: Text(
                       "About The Developers",
@@ -178,6 +180,40 @@ class _MainScreenState extends State<MainScreen> {
                     onTap: (() {
                       setState(() {
                         currentPage = 'About The Developers';
+                      });
+                      print(currentPage);
+                      Navigator.pop(context);
+                    }),
+                  ),
+                  ListTile(
+                    tileColor: currentPage == "Contact Us"
+                        ? Colors.grey.withOpacity(0.2)
+                        : null,
+                    trailing: Icon(Icons.mail),
+                    // iconColor: AERO,
+                    title: Text(
+                      "Contact Us",
+                    ),
+                    onTap: (() {
+                      setState(() {
+                        currentPage = 'Contact Us';
+                      });
+                      print(currentPage);
+                      Navigator.pop(context);
+                    }),
+                  ),
+                  ListTile(
+                    tileColor: currentPage == "Gallery"
+                        ? Colors.grey.withOpacity(0.2)
+                        : null,
+                    trailing: Icon(Icons.image),
+                    // iconColor: AERO,
+                    title: Text(
+                      "Gallery",
+                    ),
+                    onTap: (() {
+                      setState(() {
+                        currentPage = 'Gallery';
                       });
                       print(currentPage);
                       Navigator.pop(context);
@@ -484,7 +520,11 @@ class _MainScreenState extends State<MainScreen> {
                           )
                         : currentPage == "About The Developers"
                             ? AboutPage()
-                            : Container(),
+                            : currentPage == "Contact Us"
+                                ? ContactPage()
+                                : currentPage == "Gallery"
+                                    ? GalleryPage()
+                                    : Container(),
                   ),
                 ),
               ],

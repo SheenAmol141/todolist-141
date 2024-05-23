@@ -17,7 +17,7 @@ class AboutPage extends StatelessWidget {
     ];
     List<String> images = [
       "sheen.jpg",
-      "green.png",
+      "lance.jpg",
       "lyndon.jpg",
       "marc.jpg",
       "gab.jpg"
@@ -47,8 +47,8 @@ class AboutPage extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 70,
-                        backgroundImage: AssetImage(
-                            "${kIsWeb ? "" : "assets/"}${images[index]}"),
+                        backgroundImage:
+                            AssetImage("${"assets/"}${images[index]}"),
                       ),
                       SizedBox(
                         width: 30,
