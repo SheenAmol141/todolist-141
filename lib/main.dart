@@ -33,7 +33,8 @@ Future main() async {
   final prefs = await SharedPreferences.getInstance();
   final firstOpen = prefs.getBool("opened") ?? false;
 
-  runApp(MaterialApp(theme: theme(), home: SplashScreen(firstOpen)));
+  runApp(MaterialApp(
+      title: "Chekk", theme: theme(), home: SplashScreen(firstOpen)));
 }
 
 ThemeData theme() {
@@ -68,8 +69,12 @@ ThemeData theme() {
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
               backgroundColor: MaterialStatePropertyAll(CHEKK_GREEN),
-              textStyle: MaterialStatePropertyAll(
-                  TextStyle(color: WHITE, fontWeight: FontWeight.w700)))),
+              foregroundColor: MaterialStatePropertyAll(GHOST_WHITE),
+              padding: MaterialStatePropertyAll(EdgeInsets.all(25)),
+              textStyle: MaterialStatePropertyAll(GoogleFonts.montserrat(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500)))),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
@@ -217,6 +222,17 @@ class _MainScreenState extends State<MainScreen> {
                       });
                       print(currentPage);
                       Navigator.pop(context);
+                    }),
+                  ),
+                  Divider(),
+                  ListTile(
+                    trailing: Icon(Icons.logout_rounded),
+                    // iconColor: AERO,
+                    title: Text(
+                      "Logout",
+                    ),
+                    onTap: (() {
+                      logout(context);
                     }),
                   ),
                 ],
@@ -600,4 +616,15 @@ class _MainScreenState extends State<MainScreen> {
       });
     }
   }
+}
+
+void logout(context) {
+  FirebaseAuth.instance.signOut();
+  Navigator.of(context)
+      .pushReplacement(MaterialPageRoute(builder: (context) => MainScreen()));
+
+  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+    content: Text("Logged out successfully"),
+    duration: Duration(milliseconds: 500),
+  ));
 }

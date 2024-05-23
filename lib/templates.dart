@@ -144,6 +144,13 @@ class FinishedSingleTask extends StatelessWidget {
                         Text(taskdoc["description"]),
                         Text(
                             "${DateFormat(DateFormat.YEAR_MONTH_DAY).format(taskdoc["time-added"].toDate())} - ${DateFormat(DateFormat.HOUR_MINUTE).format(taskdoc["time-added"].toDate())}"),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => SingleTaskPage(taskdoc),
+                              ));
+                            },
+                            child: Text("More Details"))
                       ],
                     ),
                   ),

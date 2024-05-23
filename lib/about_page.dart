@@ -44,6 +44,7 @@ class AboutPage extends StatelessWidget {
                     child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       CircleAvatar(
                         radius: 70,
@@ -53,14 +54,10 @@ class AboutPage extends StatelessWidget {
                       SizedBox(
                         width: 30,
                       ),
-                      Column(
-                        children: [
-                          Text(
-                            dev[index],
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500, fontSize: 20),
-                          )
-                        ],
+                      Text(
+                        dev[index],
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 20),
                       ),
                     ],
                   ),

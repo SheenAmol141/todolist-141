@@ -45,6 +45,7 @@ dependencies:
   video_player: ^2.8.6
   flutter_email_sender: ^6.0.3
   http: ^1.2.1
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -105,3 +106,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/chekk_logo_green_icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/chekk_logo_green_icon.png"

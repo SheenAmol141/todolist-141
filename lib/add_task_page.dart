@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:todolist/main.dart';
+import 'package:todolist/templates.dart' hide firestore;
 
 class AddTaskPage extends StatefulWidget {
   BuildContext scafcon;
@@ -20,6 +23,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
     final description = TextEditingController();
     final key = GlobalKey<FormState>();
     return Scaffold(
+      backgroundColor: CupertinoColors.lightBackgroundGray,
+      appBar: AppBar(
+        title: Text("Add a Task"),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -60,24 +67,78 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     height: 10,
                   ),
                   StatefulBuilder(
-                    builder: (context, setState) => ElevatedButton(
-                        onPressed: () async {
-                          final pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: selectedDate ?? DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(DateTime.now().year + 5),
-                          );
-                          if (pickedDate != null &&
-                              pickedDate != selectedDate) {
-                            setState(() {
-                              selectedDate = pickedDate;
-                            });
-                          }
-                        },
-                        child: Text(selectedDate != null
-                            ? 'Selected Date: ${formattedDate(selectedDate!)}'
-                            : 'Select Date')),
+                    builder: (context, setState) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Text(
+                              selectedDate != null
+                                  ? 'Due Date: ${formattedDate(selectedDate!)}'
+                                  : 'Due Date: ',
+                              style: GoogleFonts.redHatDisplay(
+                                fontSize: 17,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            ElevatedButton(
+                                onPressed: () async {
+                                  final pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedDate ?? DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(DateTime.now().year + 5),
+                                  );
+                                  if (pickedDate != null &&
+                                      pickedDate != selectedDate) {
+                                    setState(() {
+                                      selectedDate = pickedDate;
+                                    });
+                                  }
+                                },
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.calendar_month),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text('Select Due Date from Calendar'),
+                                  ],
+                                )),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  setState(() {
+                                    selectedDate =
+                                        DateTime.now().add(Duration(days: 1));
+                                  });
+                                },
+                                child: Text('Set Due Date to Tomorrow')),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  setState(() {
+                                    selectedDate =
+                                        DateTime.now().add(Duration(days: 7));
+                                  });
+                                },
+                                child: Text('Set Due Date to Next Week')),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(
                     height: 10,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:todolist/hexcolor.dart';
 import 'package:todolist/templates.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -17,15 +18,18 @@ class ContactPage extends StatelessWidget {
     final emailcontroller = TextEditingController();
     final subjectcontroller = TextEditingController();
     final messagecontroller = TextEditingController();
-    return SingleChildScrollView(
-      child: Container(
-        width: double.maxFinite,
+    return ListView(children: [
+      Container(
         child: Form(
           key: key,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
+                SectionTitlesTemplate("Got any questions? Send us an email."),
+                SizedBox(
+                  height: 20,
+                ),
                 TextFormField(
                   controller: namecontroller,
                   decoration: InputDecoration(label: Text("Name")),
@@ -98,13 +102,13 @@ class ContactPage extends StatelessWidget {
                             context: context);
                       }
                     },
-                    child: Text("Send Test Email")),
+                    child: Text("Send")),
               ],
             ),
           ),
         ),
       ),
-    );
+    ]);
   }
 
   sendEmail(
