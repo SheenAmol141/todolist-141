@@ -32,7 +32,6 @@ Future main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final firstOpen = prefs.getBool("opened") ?? false;
-
   runApp(MaterialApp(
       title: "Chekk", theme: theme(), home: SplashScreen(firstOpen)));
 }
@@ -51,6 +50,9 @@ ThemeData theme() {
           titleTextStyle: GoogleFonts.redHatDisplay(
               color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500)),
       // textTheme: GoogleFonts.redHatDisplayTextTheme(),
+      textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+              foregroundColor: MaterialStatePropertyAll(CHEKK_GREEN))),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
             side: MaterialStatePropertyAll(

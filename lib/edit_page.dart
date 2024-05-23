@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,26 +7,31 @@ import 'package:intl/intl.dart';
 import 'package:todolist/main.dart';
 import 'package:todolist/templates.dart' hide firestore;
 
-class AddTaskPage extends StatefulWidget {
+class EditPage extends StatefulWidget {
   BuildContext scafcon;
-  AddTaskPage(this.scafcon, {super.key});
+  DocumentReference docref;
+  DocumentSnapshot taskdoc;
+  EditPage(this.scafcon, this.docref, this.taskdoc, {super.key});
 
   @override
-  State<AddTaskPage> createState() => _AddTaskPageState();
+  State<EditPage> createState() => _EditPageState();
 }
 
-class _AddTaskPageState extends State<AddTaskPage> {
-  DateTime? selectedDate;
-
+class _EditPageState extends State<EditPage> {
   @override
   Widget build(BuildContext context) {
+    DateTime selectedDate = widget.taskdoc["due"].toDate();
+
     final title = TextEditingController();
     final description = TextEditingController();
     final key = GlobalKey<FormState>();
+    title.text = widget.taskdoc["title"];
+    description.text = widget.taskdoc["description"];
+
     return Scaffold(
       backgroundColor: CupertinoColors.lightBackgroundGray,
       appBar: AppBar(
-        title: Text("Add a Task"),
+        title: Text("Edit Task"),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -134,7 +140,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     height: 10,
                   ),
                   ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (key.currentState!.validate() &&
                             selectedDate != null) {
                           firestore
@@ -153,21 +159,23 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               "title": title.text,
                               "description": description.text,
                               "due": selectedDate,
-                              "finished": false,
-                              "important": false
+                              "finished": widget.taskdoc["finished"],
+                              "important": widget.taskdoc["important"]
                             });
                           }).then((value) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(widget.scafcon).showSnackBar(
-                                SnackBar(content: Text("Task Added!")));
+                            Navigator.of(context)
+                                .pushReplacement(MaterialPageRoute(
+                              builder: (context) => MainScreen(),
+                            ));
                           });
+                          await widget.docref.delete();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
                                   "Please make sure all fields are valid!")));
                         }
                       },
-                      child: Text("Add Task"))
+                      child: Text("Update Task"))
                 ],
               )),
         ),

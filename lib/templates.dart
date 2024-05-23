@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:todolist/edit_page.dart';
 import 'package:todolist/hexcolor.dart';
 
 import 'single_task_page.dart';
@@ -20,6 +21,13 @@ class SingleTask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DocumentReference docref = firestore
+        .collection("Users")
+        .doc(FirebaseAuth.instance.currentUser!.email)
+        .collection("Dates")
+        .doc(currentDate)
+        .collection("Tasks")
+        .doc(taskdoc.id);
     bool important = taskdoc["important"];
 
     return CardTemplate(
@@ -32,14 +40,7 @@ class SingleTask extends StatelessWidget {
               children: [
                 GestureDetector(
                     onTap: () {
-                      firestore
-                          .collection("Users")
-                          .doc(FirebaseAuth.instance.currentUser!.email)
-                          .collection("Dates")
-                          .doc(currentDate)
-                          .collection("Tasks")
-                          .doc(taskdoc.id)
-                          .update({"finished": true});
+                      docref.update({"finished": true});
                       ScaffoldMessenger.of(scafcon).showSnackBar(const SnackBar(
                         content: Text("Task Completed!"),
                         duration: Duration(seconds: 1),
@@ -52,18 +53,11 @@ class SingleTask extends StatelessWidget {
                 SizedBox(
                   width: 20,
                 ),
-                Text(taskdoc["title"]),
-                Expanded(child: Container()),
+                Expanded(flex: 5, child: Text(taskdoc["title"])),
+                Expanded(flex: 1, child: Container()),
                 GestureDetector(
                   onTap: () {
-                    firestore
-                        .collection("Users")
-                        .doc(FirebaseAuth.instance.currentUser!.email)
-                        .collection("Dates")
-                        .doc(currentDate)
-                        .collection("Tasks")
-                        .doc(taskdoc.id)
-                        .update({"important": !important});
+                    docref.update({"important": !important});
                     ScaffoldMessenger.of(scafcon).showSnackBar(const SnackBar(
                       content: Text("Task Updated!"),
                       duration: Duration(milliseconds: 300),
@@ -73,7 +67,45 @@ class SingleTask extends StatelessWidget {
                     !important ? Icons.star_outline : Icons.star,
                     color: Colors.yellow,
                   ),
-                )
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                ElevatedButton(
+                    style: ButtonStyle(
+                        padding: MaterialStatePropertyAll(EdgeInsets.all(10)),
+                        backgroundColor: MaterialStatePropertyAll(Colors.red)),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: SectionTitlesTemplate("Delete Task?"),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("Cancel")),
+                              TextButton(
+                                  onPressed: () async {
+                                    await docref.delete();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                "Task Deleted Successfully!")));
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("Confirm"))
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Icon(
+                      Icons.delete_rounded,
+                      color: Colors.white,
+                    )),
               ],
             ),
             children: [
@@ -91,11 +123,12 @@ class SingleTask extends StatelessWidget {
                     children: [
                       Text(taskdoc["description"]),
                       Text(
-                          "${DateFormat(DateFormat.YEAR_MONTH_DAY).format(taskdoc["time-added"].toDate())} - ${DateFormat(DateFormat.HOUR_MINUTE).format(taskdoc["time-added"].toDate())}"),
+                          "${DateFormat(DateFormat.YEAR_MONTH_DAY).format(taskdoc["due"].toDate())} - ${DateFormat(DateFormat.HOUR_MINUTE).format(taskdoc["due"].toDate())}"),
                       TextButton(
                           onPressed: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SingleTaskPage(taskdoc),
+                              builder: (context) =>
+                                  SingleTaskPage(taskdoc, docref),
                             ));
                           },
                           child: Text("More Details"))
@@ -120,6 +153,13 @@ class FinishedSingleTask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DocumentReference docref = firestore
+        .collection("Users")
+        .doc(FirebaseAuth.instance.currentUser!.email)
+        .collection("Dates")
+        .doc(currentDate)
+        .collection("Tasks")
+        .doc(taskdoc.id);
     bool important = taskdoc["important"];
     return Card(
       color: Colors.white,
@@ -143,11 +183,12 @@ class FinishedSingleTask extends StatelessWidget {
                       children: [
                         Text(taskdoc["description"]),
                         Text(
-                            "${DateFormat(DateFormat.YEAR_MONTH_DAY).format(taskdoc["time-added"].toDate())} - ${DateFormat(DateFormat.HOUR_MINUTE).format(taskdoc["time-added"].toDate())}"),
+                            "${DateFormat(DateFormat.YEAR_MONTH_DAY).format(taskdoc["due"].toDate())} - ${DateFormat(DateFormat.HOUR_MINUTE).format(taskdoc["due"].toDate())}"),
                         TextButton(
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => SingleTaskPage(taskdoc),
+                                builder: (context) =>
+                                    SingleTaskPage(taskdoc, docref),
                               ));
                             },
                             child: Text("More Details"))
@@ -162,14 +203,7 @@ class FinishedSingleTask extends StatelessWidget {
                   children: [
                     GestureDetector(
                         onTap: () {
-                          firestore
-                              .collection("Users")
-                              .doc(FirebaseAuth.instance.currentUser!.email)
-                              .collection("Dates")
-                              .doc(currentDate)
-                              .collection("Tasks")
-                              .doc(taskdoc.id)
-                              .update({"finished": false});
+                          docref.update({"finished": false});
                           ScaffoldMessenger.of(scafcon).showSnackBar(
                               const SnackBar(
                                   duration: Duration(seconds: 1),
@@ -182,23 +216,19 @@ class FinishedSingleTask extends StatelessWidget {
                     SizedBox(
                       width: 20,
                     ),
-                    Text(
-                      taskdoc["title"],
-                      style: TextStyle(
-                        decoration: TextDecoration.lineThrough,
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        taskdoc["title"],
+                        style: TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                        ),
                       ),
                     ),
-                    Expanded(child: Container()),
+                    Expanded(flex: 1, child: Container()),
                     GestureDetector(
                       onTap: () {
-                        firestore
-                            .collection("Users")
-                            .doc(FirebaseAuth.instance.currentUser!.email)
-                            .collection("Dates")
-                            .doc(currentDate)
-                            .collection("Tasks")
-                            .doc(taskdoc.id)
-                            .update({"important": !important});
+                        docref.update({"important": !important});
                         ScaffoldMessenger.of(scafcon)
                             .showSnackBar(const SnackBar(
                           content: Text("Task Updated!"),
@@ -209,7 +239,47 @@ class FinishedSingleTask extends StatelessWidget {
                         !important ? Icons.star_outline : Icons.star,
                         color: Colors.yellow,
                       ),
-                    )
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    ElevatedButton(
+                        style: ButtonStyle(
+                            padding:
+                                MaterialStatePropertyAll(EdgeInsets.all(10)),
+                            backgroundColor:
+                                MaterialStatePropertyAll(Colors.red)),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: SectionTitlesTemplate("Delete Task?"),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Cancel")),
+                                  TextButton(
+                                      onPressed: () async {
+                                        await docref.delete();
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    "Task Deleted Successfully!")));
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Confirm"))
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Icon(
+                          Icons.delete_rounded,
+                          color: Colors.white,
+                        )),
                   ],
                 ),
               )),

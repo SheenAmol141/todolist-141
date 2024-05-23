@@ -8,20 +8,25 @@ import 'package:todolist/templates.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
-class ContactPage extends StatelessWidget {
+class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
 
   @override
+  State<ContactPage> createState() => _ContactPageState();
+}
+
+class _ContactPageState extends State<ContactPage> {
+  final formkey = GlobalKey<FormState>();
+  final namecontroller = TextEditingController();
+  final emailcontroller = TextEditingController();
+  final subjectcontroller = TextEditingController();
+  final messagecontroller = TextEditingController();
+  @override
   Widget build(BuildContext context) {
-    final key = GlobalKey<FormState>();
-    final namecontroller = TextEditingController();
-    final emailcontroller = TextEditingController();
-    final subjectcontroller = TextEditingController();
-    final messagecontroller = TextEditingController();
     return ListView(children: [
       Container(
         child: Form(
-          key: key,
+          key: formkey,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -93,7 +98,7 @@ class ContactPage extends StatelessWidget {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      if (key.currentState!.validate()) {
+                      if (formkey.currentState!.validate()) {
                         sendEmail(
                             email: emailcontroller.text,
                             name: namecontroller.text,
