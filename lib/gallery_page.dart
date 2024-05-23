@@ -11,7 +11,7 @@ class GalleryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<String> images = [
-      "chekk_alt_white.png",
+      "check_alt_white.png",
       "chekk_alt.png",
       "chekk_circle.png",
       "chekk_green_variant.png",
@@ -20,46 +20,49 @@ class GalleryPage extends StatelessWidget {
       "chekk_white_variant.png"
     ];
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          SectionTitlesTemplate("Gallery"),
-          SizedBox(
-            height: 20,
-          ),
-          Container(
-            width: double.maxFinite,
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: images.length,
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-              itemBuilder: (_, index) {
-                return GridTile(
-                  child: GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            content: Image.asset("assets/${images[index]}"),
-                          );
-                        },
-                      );
-                    },
-                    child: CardTemplate(
-                      child: Container(
-                        child: Image.asset(
-                          "assets/${images[index]}",
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            SectionTitlesTemplate("Gallery"),
+            SizedBox(
+              height: 20,
+            ),
+            Container(
+              width: double.maxFinite,
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: images.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4),
+                itemBuilder: (_, index) {
+                  return GridTile(
+                    child: GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              content: Image.asset("assets/${images[index]}"),
+                            );
+                          },
+                        );
+                      },
+                      child: CardTemplate(
+                        child: Container(
+                          child: Image.asset(
+                            "assets/${images[index]}",
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
