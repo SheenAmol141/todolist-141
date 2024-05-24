@@ -249,8 +249,10 @@ class _MainScreenState extends State<MainScreen> {
                   child: Container(
                     height: double.maxFinite,
                     color: CupertinoColors.lightBackgroundGray,
-                    child: currentPage == 'Homepage'
+                    child: currentPage ==
+                            'Homepage' // homepage -------------------
                         ? SingleChildScrollView(
+                            // homepage -------------------
                             child: Container(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -258,6 +260,168 @@ class _MainScreenState extends State<MainScreen> {
                                   SizedBox(
                                     height: 40,
                                   ),
+                                  //TASKSS TODAY -------------------------------------
+                                  SectionTitlesTemplate("Tasks Today"),
+                                  StreamBuilder(
+                                    stream: firestore
+                                        .collection("Users")
+                                        .doc(email)
+                                        .collection("Dates")
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return Center(
+                                          child: Container(),
+                                        );
+                                      } else if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            color: CHEKK_GREEN,
+                                          ),
+                                        );
+                                      } else {
+                                        List<String> dates = [];
+                                        for (DocumentSnapshot date
+                                            in snapshot.data!.docs.toList()) {
+                                          if (formattedDate(DateTime.now()) ==
+                                              date.id) dates.add(date.id);
+                                        }
+                                        return SingleChildScrollView(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(20.0),
+                                            child: ListView.separated(
+                                                shrinkWrap: true,
+                                                physics:
+                                                    NeverScrollableScrollPhysics(),
+                                                itemBuilder: (context, index) {
+                                                  final currentdate =
+                                                      dates[index];
+                                                  return Column(
+                                                    children: [
+                                                      StreamBuilder(
+                                                        stream: firestore
+                                                            .collection("Users")
+                                                            .doc(email)
+                                                            .collection("Dates")
+                                                            .doc(currentdate)
+                                                            .collection("Tasks")
+                                                            .where("finished",
+                                                                isEqualTo:
+                                                                    false)
+                                                            .snapshots(),
+                                                        builder: (context,
+                                                            snapshot) {
+                                                          if (!snapshot
+                                                              .hasData) {
+                                                            return Container();
+                                                          } else if (snapshot
+                                                                  .connectionState ==
+                                                              ConnectionState
+                                                                  .waiting) {
+                                                            return Container();
+                                                          } else {
+                                                            List<DocumentSnapshot>
+                                                                tasks = [];
+                                                            for (DocumentSnapshot task
+                                                                in snapshot
+                                                                    .data!
+                                                                    .docs
+                                                                    .reversed
+                                                                    .toList()) {
+                                                              if (searching) {
+                                                                if (task[
+                                                                        "title"]
+                                                                    .toString()
+                                                                    .toLowerCase()
+                                                                    .startsWith(
+                                                                        searchcontroller
+                                                                            .text))
+                                                                  tasks.add(
+                                                                      task);
+                                                              } else {
+                                                                tasks.add(task);
+                                                              }
+                                                            }
+                                                            if (tasks.isEmpty)
+                                                              return Container();
+                                                            return Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                ),
+                                                                // Padding(
+                                                                //   padding:
+                                                                //       const EdgeInsets
+                                                                //           .only(
+                                                                //           left:
+                                                                //               5.0),
+                                                                //   child: Text(
+                                                                //     "Due on " +
+                                                                //         currentdate,
+                                                                //     style: GoogleFonts
+                                                                //         .redHatDisplay(
+                                                                //       fontSize:
+                                                                //           20,
+                                                                //       fontWeight:
+                                                                //           FontWeight
+                                                                //               .w500,
+                                                                //     ),
+                                                                //   ),
+                                                                // ),
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                ),
+                                                                ListView
+                                                                    .separated(
+                                                                        shrinkWrap:
+                                                                            true,
+                                                                        physics:
+                                                                            NeverScrollableScrollPhysics(),
+                                                                        itemBuilder:
+                                                                            (context,
+                                                                                index) {
+                                                                          final currenttask =
+                                                                              tasks[index];
+
+                                                                          return SingleTask(
+                                                                              context,
+                                                                              currentdate,
+                                                                              currenttask);
+                                                                        },
+                                                                        separatorBuilder: (context,
+                                                                                index) =>
+                                                                            SizedBox(
+                                                                              height: 5,
+                                                                            ),
+                                                                        itemCount:
+                                                                            tasks.length),
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                ),
+                                                              ],
+                                                            );
+                                                          }
+                                                        },
+                                                      )
+                                                    ],
+                                                  );
+                                                },
+                                                separatorBuilder:
+                                                    (context, index) =>
+                                                        SizedBox(
+                                                          height: 10,
+                                                        ),
+                                                itemCount: dates.length),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  //TASKS TODAY -------------------------------------
                                   SectionTitlesTemplate("Current Tasks"),
                                   StreamBuilder(
                                     stream: firestore
@@ -494,32 +658,53 @@ class _MainScreenState extends State<MainScreen> {
                                                             }
                                                             if (tasks.isEmpty)
                                                               return Container();
-                                                            return ListView
-                                                                .separated(
-                                                                    shrinkWrap:
-                                                                        true,
-                                                                    physics:
-                                                                        NeverScrollableScrollPhysics(),
-                                                                    itemBuilder:
-                                                                        (context,
-                                                                            index) {
-                                                                      final currenttask =
-                                                                          tasks[
-                                                                              index];
+                                                            return Column(
+                                                              children: [
+                                                                Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          left:
+                                                                              5.0),
+                                                                  child: Text(
+                                                                    "Finished on " +
+                                                                        currentdate,
+                                                                    style: GoogleFonts
+                                                                        .redHatDisplay(
+                                                                      fontSize:
+                                                                          20,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                ListView
+                                                                    .separated(
+                                                                        shrinkWrap:
+                                                                            true,
+                                                                        physics:
+                                                                            NeverScrollableScrollPhysics(),
+                                                                        itemBuilder:
+                                                                            (context,
+                                                                                index) {
+                                                                          final currenttask =
+                                                                              tasks[index];
 
-                                                                      return FinishedSingleTask(
-                                                                          context,
-                                                                          currentdate,
-                                                                          currenttask);
-                                                                    },
-                                                                    separatorBuilder:
-                                                                        (context,
+                                                                          return FinishedSingleTask(
+                                                                              context,
+                                                                              currentdate,
+                                                                              currenttask);
+                                                                        },
+                                                                        separatorBuilder: (context,
                                                                                 index) =>
                                                                             SizedBox(
                                                                               height: 10,
                                                                             ),
-                                                                    itemCount: tasks
-                                                                        .length);
+                                                                        itemCount:
+                                                                            tasks.length),
+                                                              ],
+                                                            );
                                                           }
                                                         },
                                                       )
@@ -535,7 +720,7 @@ class _MainScreenState extends State<MainScreen> {
                                 ],
                               ),
                             ),
-                          )
+                          ) // homepage -------------------// homepage -------------------// homepage -------------------
                         : currentPage == "About The Developers"
                             ? AboutPage()
                             : currentPage == "Contact Us"

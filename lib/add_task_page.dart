@@ -112,6 +112,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
                             ElevatedButton(
                                 onPressed: () async {
                                   setState(() {
+                                    selectedDate = DateTime.now();
+                                  });
+                                },
+                                child: Text('Set Due Date to Today')),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  setState(() {
                                     selectedDate =
                                         DateTime.now().add(Duration(days: 1));
                                   });

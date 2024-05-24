@@ -40,11 +40,27 @@ class SingleTask extends StatelessWidget {
               children: [
                 GestureDetector(
                     onTap: () {
-                      docref.update({"finished": true});
-                      ScaffoldMessenger.of(scafcon).showSnackBar(const SnackBar(
-                        content: Text("Task Completed!"),
-                        duration: Duration(seconds: 1),
-                      ));
+                      firestore
+                          .collection("Users")
+                          .doc(FirebaseAuth.instance.currentUser!.email)
+                          .collection("Dates")
+                          .doc(formattedDate(DateTime.now()!))
+                          .set({}).then((value) {
+                        firestore
+                            .collection("Users")
+                            .doc(FirebaseAuth.instance.currentUser!.email)
+                            .collection("Dates")
+                            .doc(formattedDate(DateTime.now()!))
+                            .collection("Tasks")
+                            .add({
+                          "title": taskdoc["title"],
+                          "description": taskdoc["description"],
+                          "due": taskdoc["due"].toDate(),
+                          "finished": true,
+                          "important": taskdoc["important"]
+                        });
+                        docref.delete();
+                      });
                     },
                     child: SizedBox(
                       width: 35,
